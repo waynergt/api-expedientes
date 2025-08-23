@@ -1,25 +1,22 @@
 import sql from 'mssql';
-import { config } from '../config/env';
+import { DB_USER, DB_PASS, DB_HOST, DB_NAME } from '../config/env';
 
-const dbSettings: sql.config = {
-  server: config.DB_SERVER,
-  database: config.DB_NAME,
-  user: config.DB_USER,
-  password: config.DB_PASSWORD,
+const dbConfig: sql.config = {
+  user: DB_USER,
+  password: DB_PASS,
+  server: DB_HOST,
+  database: DB_NAME,
   options: {
-    encrypt: false, // Para local, pon true si usas Azure
+    encrypt: false,
     trustServerCertificate: true,
-  }
+  },
 };
 
-export async function getConnection() {
-  try {
-    const pool = await sql.connect(dbSettings);
-    return pool;
-  } catch (error) {
-    console.error('Error de conexión a la base de datos:', error);
-    throw error;
-  }
+export const pool = new sql.ConnectionPool(dbConfig);
+
+export async function getPool() {
+  if (!pool.connected) await pool.connect();
+  return pool;
 }
 
 export { sql };

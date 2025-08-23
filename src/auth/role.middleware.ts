@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 
-export function authorizeRoles(...roles: string[]) {
+export function roleMiddleware(role: 'tecnico' | 'coordinador') {
   return (req: Request, res: Response, next: NextFunction) => {
-    // @ts-ignore
-    const user = req.user;
-    if (!user || !roles.includes(user.rol)) {
-      return res.status(403).json({ message: 'No autorizado' });
+    const user = (req as any).user;
+    if (!user || user.rol !== role) {
+      return res.status(403).json({ ok: false, error: 'No autorizado' });
     }
     next();
   };
