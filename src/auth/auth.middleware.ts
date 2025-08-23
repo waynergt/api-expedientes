@@ -1,9 +1,8 @@
+/// <reference types="../types/express" />
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/env';
-import { Usuario } from '../models/usuario.model';
 
-// Middleware para autenticación JWT
 export function authMiddleware(
   req: Request,
   res: Response,
@@ -24,7 +23,6 @@ export function authMiddleware(
       'usuario_id' in decoded &&
       'rol' in decoded
     ) {
-      // TypeScript ya reconoce req.user si extendiste Express correctamente
       req.user = {
         usuario_id: (decoded as any).usuario_id,
         rol: (decoded as any).rol,
@@ -38,7 +36,6 @@ export function authMiddleware(
   }
 }
 
-// Middleware para autorización por roles
 export function requireRole(roles: string[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req.user.rol)) {
