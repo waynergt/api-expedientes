@@ -1,21 +1,22 @@
 import { Request, Response } from 'express';
+import { getPool, sql } from '../db/db';
 
 export async function listarIndiciosPorExpediente(req: Request, res: Response) {
-  // Lógica para llamar al SP y retornar los indicios
+  // Implementar la lógica real usando SP de la BD
   res.json({ ok: true, indicios: [] });
 }
 
 export async function crearIndicio(req: Request, res: Response) {
-  // Lógica para llamar al SP para crear un indicio
+  // Implementar la lógica real usando SP de la BD
   res.status(201).json({ ok: true, indicio_id: 1 });
 }
 
 export async function actualizarIndicio(req: Request, res: Response) {
-  // Lógica para llamar al SP para actualizar un indicio
+  // Implementar la lógica real usando SP de la BD
   res.json({ ok: true });
 }
 
-export async function cambiarActivoIndicio(req: Request, res: Response) {
-  // Lógica para llamar al SP para soft delete/activar un indicio
+export async function activarDesactivarIndicio(req: Request, res: Response) {
+  // Implementar la lógica real usando SP de la BD
   res.json({ ok: true });
 }

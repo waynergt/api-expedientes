@@ -1,22 +1,25 @@
 import sql from 'mssql';
-import { DB_USER, DB_PASS, DB_HOST, DB_NAME } from '../config/env';
+import { config } from '../config/env';
 
-const dbConfig: sql.config = {
-  user: DB_USER,
-  password: DB_PASS,
-  server: DB_HOST,
-  database: DB_NAME,
-  options: {
-    encrypt: false,
-    trustServerCertificate: true,
-  },
-};
+const poolPromise = new sql.ConnectionPool(config.db as any)
+  .connect()
+  .then(pool => {
+    console.log('✅ Conectado a SQL Server');
+    return pool;
+  })
+  .catch(err => {
+    console.error('❌ Error de conexión:', err);
+    throw err;
+  });
 
-export const pool = new sql.ConnectionPool(dbConfig);
-
-export async function getPool() {
-  if (!pool.connected) await pool.connect();
-  return pool;
+export async function ejecutarSP(nombreSP: string, parametros: Record<string, any> = {}) {
+  const pool = await poolPromise;
+  const request = pool.request();
+  Object.keys(parametros).forEach(key => {
+    request.input(key, parametros[key]);
+  });
+  const result = await request.execute(nombreSP);
+  return result.recordset;
 }
 
 export { sql };
