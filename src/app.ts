@@ -9,14 +9,21 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-setupSwagger(app); // Swagger UI en /docs
+// Swagger UI en /api-docs
+setupSwagger(app);
 
+// Redirige la raíz "/" a swagger
+app.get('/', (req, res) => {
+  res.redirect('/api-docs');
+});
+
+// Aquí va tu API principal
 app.use('/api', router);
 
-// 404 handler
+// Handler 404 para rutas no encontradas (excepto / y /api-docs)
 app.use((req, res) => res.status(404).json({ ok: false, error: 'No encontrado' }));
 
-// Error handler
+// Manejador de errores global
 app.use(errorHandler);
 
 export { app };

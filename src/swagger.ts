@@ -1,27 +1,22 @@
-// @ts-ignore
-import swaggerUi from 'swagger-ui-express';
-// @ts-ignore
-import swaggerJSDoc from 'swagger-jsdoc';
 import { Express } from 'express';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 
-const options = {
+const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
       title: 'API de Gestión de Expedientes e Indicios',
       version: '1.0.0',
-      description: 'Documentación de la API',
+      description: 'Documentación de la API para la gestión de expedientes e indicios.',
     },
-    servers: [
-      { url: 'http://localhost:3000' }
-    ]
+    servers: [{ url: 'http://localhost:3000' }],
   },
-  apis: ['./src/routes/*.ts'], // Puedes documentar tus rutas con JSDoc
+  apis: ['./src/routes/*.ts'], // Ajusta si tus rutas están en otro lugar
 };
 
-// @ts-ignore
-const swaggerSpec = swaggerJSDoc(options);
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 export function setupSwagger(app: Express) {
-  app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 }

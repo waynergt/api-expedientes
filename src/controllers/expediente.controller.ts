@@ -22,6 +22,9 @@ export async function cambiarEstadoExpediente(req: Request, res: Response) {
   res.json({ ok: true });
 }
 
-export async function cambiarActivoExpediente(req: Request, res: Response) {
+/**
+ * Activar o desactivar (soft delete) un expediente.
+ */
+export async function activarDesactivarExpediente(req: Request, res: Response) {
   res.json({ ok: true });
 }
