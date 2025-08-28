@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { getPool, sql } from '../db/db';
 
 export async function listarExpedientes(req: Request, res: Response) {
   // Implementación real como ya se mostró antes...

@@ -1,9 +1,8 @@
-import { app } from './app';
-import { config } from 'dotenv';
-config();
+import app from './app';
+import { config } from './config/env';
+import './db/db'; // inicializa pool
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`API escuchando en http://localhost:${PORT}`);
+app.listen(config.port, () => {
+  console.log(`🚀 API corriendo en http://localhost:${config.port}`);
+  console.log(`📘 Swagger en   http://localhost:${config.port}/api-docs`);
 });

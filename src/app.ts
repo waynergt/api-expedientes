@@ -1,29 +1,25 @@
 import express from 'express';
+import pinoHttp from 'pino-http';
 import cors from 'cors';
-import router from './routes';
-import { errorHandler } from './middlewares/error.middleware';
+import helmet from 'helmet';
 import { setupSwagger } from './swagger';
+import routes from './routes';
+import { errorHandler } from './middlewares/error.middleware';
 
 const app = express();
-
 app.use(express.json());
+app.use(pinoHttp());
 app.use(cors());
+app.use(helmet());
 
-// Swagger UI en /api-docs
 setupSwagger(app);
 
-// Redirige la raíz "/" a swagger
-app.get('/', (req, res) => {
-  res.redirect('/api-docs');
-});
+app.get('/health', (_req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
-// Aquí va tu API principal
-app.use('/api', router);
+// Enrutar API
+app.use('/', routes);
 
-// Handler 404 para rutas no encontradas (excepto / y /api-docs)
-app.use((req, res) => res.status(404).json({ ok: false, error: 'No encontrado' }));
-
-// Manejador de errores global
+// Error handler central
 app.use(errorHandler);
 
-export { app };
+export default app;

@@ -1,6 +1,8 @@
 import * as dotenv from 'dotenv';
 dotenv.config();
 
+export const JWT_SECRET = process.env.JWT_SECRET || 'supersecretchangeit';
+
 export const config = {
   env: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT || 3000),
@@ -9,7 +11,7 @@ export const config = {
   db: {
     user: process.env.DB_USER || 'sa',
     password: process.env.DB_PASSWORD || 'YourStrong!Passw0rd',
-    database: process.env.DB_NAME || 'gestiondb',
+    database: process.env.DB_NAME || 'expedientes_db',
     server: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT || 1433),
     options: {
