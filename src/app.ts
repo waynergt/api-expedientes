@@ -17,7 +17,7 @@ setupSwagger(app);
 app.get('/health', (_req, res) => res.json({ status: 'ok', uptime: process.uptime() }));
 
 // Enrutar API
-app.use('/', routes);
+app.use('/api', routes);
 
 // Error handler central
 app.use(errorHandler);
