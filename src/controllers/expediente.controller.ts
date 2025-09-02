@@ -1,13 +1,35 @@
 import { Request, Response } from "express";
 import { ejecutarSP } from "../db/db";
 
+interface ExpedienteCreado {
+  expediente_id: number;
+}
+
+interface Expediente {
+  expediente_id: number;
+  codigo: string;
+  descripcion: string;
+  estado: string;
+  tecnico_id: number;
+  creado_en: Date;
+  actualizado_en: Date;
+  [key: string]: any; // Para otros campos que pueda devolver el SP
+}
+
 // Listar expedientes con filtros y paginación
 export async function listarExpedientes(req: Request, res: Response) {
   try {
     // Si no se pasa tecnico_id por query, usa el del usuario autenticado
+    if (!req.user) {
+      return res.status(401).json({ 
+        ok: false, 
+        error: 'Usuario no autenticado' 
+      });
+    }
+
     const tecnico_id = req.query.tecnico_id
       ? Number(req.query.tecnico_id)
-      : req.user!.usuario_id;
+      : req.user.usuario_id;
 
     const {
       estado = null,
@@ -16,13 +38,16 @@ export async function listarExpedientes(req: Request, res: Response) {
       limit = 20,
     } = req.query;
 
-    const expedientes = await ejecutarSP("sp_Expedientes_Listar", {
+    const result = await ejecutarSP("sp_Expedientes_Listar", {
       TecnicoId: tecnico_id,
       Estado: estado ? String(estado) : null,
       Buscar: buscar ? String(buscar) : null,
       Offset: Number(offset),
       Limit: Number(limit),
     });
+
+    // Asegurar que tenemos un resultado válido
+    const expedientes = Array.isArray(result) && result.length > 0 ? result[0] : [];
 
     res.json({ ok: true, expedientes });
   } catch (error: any) {
@@ -34,13 +59,17 @@ export async function listarExpedientes(req: Request, res: Response) {
 export async function obtenerExpediente(req: Request, res: Response) {
   try {
     const { id } = req.params;
-    const expediente = await ejecutarSP("sp_Expedientes_Obtener", {
+    const result = await ejecutarSP("sp_Expedientes_Obtener", {
       ExpedienteId: Number(id),
     });
-    if (!expediente[0]) {
+
+    // Verificar si tenemos resultados
+    if (!Array.isArray(result) || result.length === 0 || !result[0] || result[0].length === 0) {
       return res.status(404).json({ ok: false, error: "Expediente no encontrado" });
     }
-    res.json({ ok: true, expediente: expediente[0] });
+
+    const expediente = result[0][0] as Expediente;
+    res.json({ ok: true, expediente });
   } catch (error: any) {
     res.status(500).json({ ok: false, error: error.message });
   }
@@ -50,7 +79,14 @@ export async function obtenerExpediente(req: Request, res: Response) {
 export async function crearExpediente(req: Request, res: Response) {
   try {
     const { codigo, descripcion } = req.body;
-    const tecnico_id = req.user!.usuario_id;
+    if (!req.user) {
+      return res.status(401).json({ 
+        ok: false, 
+        error: 'Usuario no autenticado' 
+      });
+    }
+
+    const tecnico_id = req.user.usuario_id;
 
     if (!codigo || !descripcion) {
       return res.status(400).json({
@@ -65,8 +101,13 @@ export async function crearExpediente(req: Request, res: Response) {
       TecnicoId: tecnico_id,
     });
 
-    const expediente_id = result[0]?.expediente_id;
-    res.status(201).json({ ok: true, expediente_id });
+    // Obtener el ID del expediente creado del primer registro del recordset
+    if (!Array.isArray(result) || result.length === 0 || !result[0] || result[0].length === 0) {
+      throw new Error('Error al crear el expediente: no se obtuvo el ID');
+    }
+
+    const expedienteCreado = result[0][0] as ExpedienteCreado;
+    res.status(201).json({ ok: true, expediente_id: expedienteCreado.expediente_id });
   } catch (error: any) {
     res.status(400).json({ ok: false, error: error.message });
   }

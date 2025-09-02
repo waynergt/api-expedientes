@@ -1,6 +1,23 @@
 import { Request, Response } from 'express';
 import { ejecutarSP } from '../db/db';
 
+interface IndicioCreado {
+  indicio_id: number;
+}
+
+interface Indicio {
+  indicio_id: number;
+  expediente_id: number;
+  codigo: string;
+  descripcion: string;
+  peso: number;
+  color: string;
+  tamano: string;
+  activo: boolean;
+  creado_en?: Date;
+  actualizado_en?: Date;
+}
+
 // Listar indicios por expediente
 export async function listarIndiciosPorExpediente(req: Request, res: Response) {
   try {
@@ -10,10 +27,13 @@ export async function listarIndiciosPorExpediente(req: Request, res: Response) {
       return res.status(400).json({ ok: false, error: 'Falta el expediente_id.' });
     }
 
-    const indicios = await ejecutarSP('sp_Indicios_ListarPorExpediente', {
+    const result = await ejecutarSP('sp_Indicios_ListarPorExpediente', {
       ExpedienteId: Number(expediente_id),
     });
 
+    // Verificar y procesar los resultados
+    const indicios = Array.isArray(result) && result.length > 0 ? result[0] as Indicio[] : [];
+    
     res.json({ ok: true, indicios });
   } catch (error: any) {
     res.status(500).json({ ok: false, error: error.message });
@@ -47,8 +67,13 @@ export async function crearIndicio(req: Request, res: Response) {
       // TecnicoId: tecnico_id,
     });
 
-    const indicio_id = result[0]?.indicio_id;
-    res.status(201).json({ ok: true, indicio_id });
+    // Verificar y extraer el ID del indicio creado
+    if (!Array.isArray(result) || result.length === 0 || !result[0] || result[0].length === 0) {
+      throw new Error('Error al crear el indicio: no se obtuvo el ID');
+    }
+
+    const indicioCreado = result[0][0] as IndicioCreado;
+    res.status(201).json({ ok: true, indicio_id: indicioCreado.indicio_id });
   } catch (error: any) {
     res.status(400).json({ ok: false, error: error.message });
   }

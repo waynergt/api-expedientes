@@ -1,12 +1,19 @@
-// Extiende tipos de Express para incluir req.user
 import 'express';
+
+interface AuthUser {
+  usuario_id: number;
+  rol: 'tecnico' | 'coordinador';
+  email?: string;
+  nombre?: string;
+  [key: string]: any;
+}
 
 declare global {
   namespace Express {
     interface Request {
-      user?: { usuario_id: string; rol: 'tecnico' | 'coordinador'; email?: string };
+      user?: AuthUser;
     }
-  }
+  }
 }
 
-export {};
+export { AuthUser };
